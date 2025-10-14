@@ -1,0 +1,7 @@
+﻿playwright==1.55.0
+pytest
+pytest-html
+pytest-playwright
+PyYAML
+mcp
+openai

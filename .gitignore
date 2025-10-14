@@ -1,0 +1,9 @@
+﻿venv/
+__pycache__/
+*.pyc
+.playwright/
+test-results/
+.DS_Store
+Thumbs.db
+commands.txt
+pom.xml
