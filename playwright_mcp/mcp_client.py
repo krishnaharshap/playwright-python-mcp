@@ -1,8 +1,7 @@
 # playwright_mcp/mcp_client.py
 
-from mcp import Client, connect_websocket
+from mcp import client as mcp_client  # import the lowercase module
 import asyncio
-import json
 
 class MCPClient:
     def __init__(self, server_url: str):
@@ -11,11 +10,11 @@ class MCPClient:
 
     async def connect(self):
         print(f"[MCP] Connecting to {self.server_url}...")
-        self.client = await connect_websocket(self.server_url)
+        self.client = mcp_client.Client(self.server_url)  # use Client via mcp_client
+        await self.client.connect()
         print("[MCP] Connected.")
 
     async def send_context(self, context_data: dict):
-        """Send context (like page title or state) to MCP model for reasoning."""
         if not self.client:
             raise RuntimeError("MCP client not connected.")
         response = await self.client.query({"context": context_data})
