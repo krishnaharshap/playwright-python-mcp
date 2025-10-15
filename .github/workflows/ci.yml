@@ -15,41 +15,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
 
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-
-    - name: Install dependencies
-      run: |
-          python -m pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m venv venv
           # If mcp is private, uncomment below:
           # python -m pip install git+https://github.com/your-org/mcp.git
-          playwright install
+          ./venv/bin/python -m pip install -r requirements.txt || .\venv\Scripts\python.exe -m pip install -r requirements.txt
+          ./venv/bin/python -m playwright install || .\venv\Scripts\python.exe -m playwright install
 
+      - name: Run tests
+        run: |
+          ./venv/bin/python -m pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html \
+          || .\venv\Scripts\python.exe -m pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html
 
-    - name: Run tests
-      run: |
-        source venv/bin/activate || .\venv\Scripts\Activate.ps1
-        pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html
-
-    - name: Upload HTML Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: pytest-report
-        path: report.html
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-report
+          path: report.html
