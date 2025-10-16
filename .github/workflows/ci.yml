@@ -37,15 +37,25 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          # If mcp is private, uncomment below:
-          # python -m pip install git+https://github.com/your-org/mcp.git
-          ./venv/bin/python -m pip install -r requirements.txt || .\venv\Scripts\python.exe -m pip install -r requirements.txt
-          ./venv/bin/python -m playwright install || .\venv\Scripts\python.exe -m playwright install
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            .\venv\Scripts\python.exe -m pip install -r requirements.txt
+            .\venv\Scripts\python.exe -m playwright install
+          else
+            ./venv/bin/python -m pip install -r requirements.txt
+            ./venv/bin/python -m playwright install
+          fi
+
 
       - name: Run tests
         run: |
-          ./venv/bin/python -m pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html \
-          || .\venv\Scripts\python.exe -m pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            .\venv\Scripts\Activate.ps1
+            pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html
+          else
+            source venv/bin/activate
+            pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html
+          fi
+
 
       - name: Upload HTML Report
         uses: actions/upload-artifact@v4
