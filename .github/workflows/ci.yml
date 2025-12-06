@@ -6,10 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  actions: read
+
 env:
   PYTHONPATH: .
-  MCP_SERVER_URL: wss://mcp.openai.com/v1
-
+  MCP_SERVER_URL: ${{ secrets.MCP_SERVER_URL }}
 jobs:
   test:
     runs-on: ubuntu-latest
