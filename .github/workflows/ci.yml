@@ -12,7 +12,9 @@ permissions:
 
 env:
   PYTHONPATH: .
-  MCP_SERVER_URL: ${{ secrets.MCP_SERVER_URL }}
+  MCP_SERVER_URL: ${{ secrets.MCP_SERVER_URL || 'ws://localhost:8000' }}
+  MCP_SERVER_COMMAND: python -m mcp.server
+  
 jobs:
   test:
     runs-on: ubuntu-latest
