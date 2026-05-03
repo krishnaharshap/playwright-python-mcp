@@ -1,9 +1,11 @@
 ﻿venv/
 __pycache__/
-*.pyc
+.vscode/
+.pytest_cache/
 .playwright/
 test-results/
 .DS_Store
 Thumbs.db
 commands.txt
-pom.xml
+report.html
+*.pyc

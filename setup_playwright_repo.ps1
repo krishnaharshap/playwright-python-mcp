@@ -109,7 +109,7 @@ Write-IfNotExists "playwright_mcp/__init__.py" "# Playwright MCP package"
 $browserPy = @'
 from playwright.sync_api import sync_playwright
 
-def launch_and_get_title(url: str = "https://example.com") -> str:
+def launch_and_get_title(url: str = "https://demo.playwright.dev/todomvc/") -> str:
     """Launch Chromium headless, navigate to URL, return title."""
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -129,8 +129,8 @@ $testPy = @'
 from playwright_mcp.browser import launch_and_get_title
 
 def test_example_title():
-    title = launch_and_get_title("https://example.com")
-    assert "Example Domain" in title
+    title = launch_and_get_title("https://demo.playwright.dev/todomvc/")
+    assert "TodoMVC" in title
 '@
 Write-IfNotExists "tests/test_example.py" $testPy
 

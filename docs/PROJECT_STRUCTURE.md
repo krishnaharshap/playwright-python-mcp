@@ -1,29 +1,33 @@
-## 📁 Project Directory Structure
+# Project Directory Structure
+
+This repository demonstrates a Python MCP client driving browser automation through the official Playwright MCP server over stdio.
 
 ```plaintext
 playwright-python-mcp/
 │
 ├── .github/
 │   └── workflows/
-│       └── python-ci.yml        # GitHub Actions CI workflow
+│       └── ci.yml                    # GitHub Actions CI workflow
 │
-├── tests/                       # All test cases (Pytest format)
-│   ├── test_sample.py           # Example test file
-│   └── conftest.py              # Common pytest fixtures/hooks
+├── docs/
+│   ├── PROJECT_STRUCTURE.md          # This architecture/reference doc
+│   └── setup.md                      # Local setup and usage guide
 │
-├── pages/                       # ⚙️ TODO: Add Page Object Model (POM) classes
-│   ├── base_page.py               # TODO: Create shared page methods
-│   ├── login_page.py              # TODO: Define login locators/actions
-│   └── dashboard_page.py          # TODO: Implement dashboard interactions
+├── playwright_mcp/                   # Python MCP client implementation
+│   ├── __init__.py
+│   ├── browser.py                    # Playwright browser helper utilities
+│   ├── config.py                     # Default smoke-test URL/text and config
+│   ├── mcp_adapter.py                # MCP smoke flow and evaluation logic
+│   └── mcp_client.py                 # Starts @playwright/mcp over stdio
 │
-├── utils/                         # ⚙️ TODO: Add reusable helper utilities
-│   ├── config_reader.py           # TODO: For reading test configs
-│   ├── logger.py                  # TODO: Centralized logging setup
-│   └── playwright_helpers.py      # TODO: Shared Playwright operations
+├── tests/                            # Pytest test cases
+│   ├── test_example.py               # Unit/test wiring for MCP stdio client
+│   └── test_mcp_integration.py       # Opt-in live Playwright MCP smoke test
 │
-├── requirements.txt              # Project dependencies
-├── pytest.ini                    # Pytest configuration
-├── README.md                     # Project overview and usage guide
-├── report.html                   # Generated test report (artifact)
-├── venv/ or .venv/               # Local virtual environment (ignored in CI)
-└── main.py                       # Optional entry point for manual run
+├── requirements.txt                  # Python dependency manifest
+├── pytest.ini                        # Pytest configuration and default options
+├── README.md                         # Project overview and CI usage
+├── setup_playwright_repo.ps1         # Local Windows setup helper script
+├── commands.txt                      # Useful local development commands
+├── main.py                           # Optional manual runner/demo entry point
+└── report.html                       # Generated HTML test report artifact

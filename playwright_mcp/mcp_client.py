@@ -1,36 +1,106 @@
 
-# mcp_client.py
-
+import asyncio
 import os
-import httpx
+from contextlib import AsyncExitStack
+from typing import Any
+
+from mcp.client.session import ClientSession
+from mcp.client.stdio import StdioServerParameters, stdio_client
+
+from playwright_mcp.config import DEFAULT_SMOKE_URL
+
+
+DEFAULT_MCP_PACKAGE = "@playwright/mcp@latest"
+DEFAULT_MCP_ARGS = [
+    "-y",
+    DEFAULT_MCP_PACKAGE,
+    "--headless",
+    "--browser",
+    "chrome",
+    "--isolated",
+]
+
 
 class MCPClient:
-    def __init__(self):
-        self.server_url = os.getenv("MCP_SERVER_URL")
-        if not self.server_url:
-            raise ValueError("MCP_SERVER_URL not set")
+    """Python MCP client that starts Playwright MCP over stdio."""
 
-        self.client = httpx.AsyncClient(timeout=30)
+    def __init__(
+        self,
+        command: str | None = None,
+        args: list[str] | None = None,
+        env: dict[str, str] | None = None,
+    ):
+        self.command = command or os.getenv(
+            "PLAYWRIGHT_MCP_COMMAND",
+            "npx.cmd" if os.name == "nt" else "npx",
+        )
+        self.args = args or DEFAULT_MCP_ARGS.copy()
+        self.env = {**os.environ, **(env or {})}
+        self.session: ClientSession | None = None
+        self._exit_stack: AsyncExitStack | None = None
+
+    def server_params(self) -> StdioServerParameters:
+        return StdioServerParameters(
+            command=self.command,
+            args=self.args,
+            env=self.env,
+        )
 
     async def connect(self):
-    print(f"[MCP] Connecting to {self.server_url}...")
+        if self.session:
+            return self.session
 
-    # Do NOT enforce GET check — just validate URL exists
-    if not self.server_url.startswith("http"):
-        raise ValueError("Invalid MCP_SERVER_URL")
+        self._exit_stack = AsyncExitStack()
+        read, write = await self._exit_stack.enter_async_context(
+            stdio_client(self.server_params())
+        )
+        self.session = await self._exit_stack.enter_async_context(
+            ClientSession(read, write)
+        )
+        await self.session.initialize()
+        return self.session
 
-    print("[MCP] Connection config valid.")
+    async def call_tool(self, name: str, arguments: dict[str, Any] | None = None):
+        if not self.session:
+            raise RuntimeError("MCP not connected")
 
-    async def send_context(self, context_data: dict):
-    response = await self.client.post(
-        self.server_url,
-        json={"context": context_data}
-    )
+        return await self.session.call_tool(name, arguments or {})
 
-    if response.status_code >= 400:
-        raise RuntimeError(f"Request failed: {response.status_code}")
+    async def navigate(self, url: str):
+        return await self.call_tool("browser_navigate", {"url": url})
 
-    return response.json()
-    
+    async def send_context(self, data: dict):
+        url = data.get("url")
+        if not url:
+            raise ValueError("send_context requires a 'url' value")
+
+        return await self.navigate(url)
+
     async def close(self):
-        await self.client.aclose()
+        if self.session:
+            try:
+                await self.call_tool("browser_close")
+            except Exception:
+                pass
+
+        if self._exit_stack:
+            await self._exit_stack.aclose()
+
+        self.session = None
+        self._exit_stack = None
+
+    async def __aenter__(self):
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.close()
+
+
+async def navigate_with_mcp(url: str):
+    async with MCPClient() as client:
+        return await client.navigate(url)
+
+
+if __name__ == "__main__":
+    asyncio.run(navigate_with_mcp(DEFAULT_SMOKE_URL))

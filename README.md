@@ -1,117 +1,94 @@
-# 🔗 Playwright + MCP Integration
+# Playwright Python MCP
 
-This repository demonstrates how to connect **Playwright-based Python UI tests** to **MCP (Model Context Protocol)** for intelligent testing flows.
+This repository demonstrates a Python test client driving browser automation through the official Playwright MCP server over stdio.
 
-## Features
-- ✅ Browser automation with Playwright
-- 🤖 AI-aware testing using MCP SDK
-- 🧩 Configurable YAML for connecting to custom MCP servers
-- 💡 Extendable design for adaptive and self-healing test logic
-
-*NOTE: pom.xml is for local-use only*
-
-### Legacy Java Artifacts (pom.xml)
-This project is primarily a **Python / Playwright / MCP** framework. The file `pom.xml` was retained for local reference/legacy compatibility, but **is not committed** to this repository.  
-To keep it locally without committing:
-1. Add `pom.xml` to `.gitignore` (already included).  
-2. If `pom.xml` was previously tracked, run:
-   ```bash
-   git rm --cached pom.xml
-   git commit -m "Remove pom.xml from Git and ignore it"
-
-
----
-
-## ⚙️ Environment Setup
-
-### 🪟 Local (Windows)
-1. **Create and activate virtual environment**
-   ```bash
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-
-2. **Install dependencies**
-   ```bash
-   python -m pip install --upgrade pip
-   python -m pip install -r requirements.txt
-   playwright install
-
-3. **Run tests manually**
-   ```bash
-   pytest -v --maxfail=1 --disable-warnings --html=report.html --self-contained-html
-
-### Optional: Run manual test flow
-Instead of `pytest`, you can execute the main integration manually:
-   ```bash
-   python main.py
-   ```
-*This runs the MCP + Playwright flow directly and prints progress to the console.*
-
-## GitHub Actions (Ubuntu CI)
-This project includes a cross-platform GitHub Actions workflow at:
-   ```bash
-.github/workflows/python-ci.yml
-```
-## 💡Highlights:
-
-1. Auto-runs on push and pull_request to main
-
-2. Sets up Python 3.11 and caches dependencies
-
-3. Creates a virtual environment automatically
-
-4. Runs Playwright tests and uploads the HTML test report as an artifact
-
-5. Compatible with both Linux (CI) and Windows (local)
-
-## 🤖 MCP Server Integration
-
-The framework uses the following environment variable:
-   ```bash
-MCP_SERVER_URL=wss://mcp.openai.com/v1
-```
- *This enables bidirectional WebSocket communication with the MCP server for AI-assisted actions and validations.*
-
-## 🧪 Test Execution Flow
-
-```mermaid
-graph TD
-    A[Git Commit / Push] --> B[GitHub Actions Trigger]
-    B --> C[Setup Python & Install Dependencies]
-    C --> D[Run Playwright + Pytest]
-    D --> E[Generate HTML Report]
-    E --> F[Upload Artifact to GitHub]
+```text
+GitHub Actions
+   |
+   v
+Python MCP Client
+   |
+   | stdio
+   v
+Playwright MCP server (@playwright/mcp)
+   |
+   v
+Browser automation
 ```
 
-## 📊 HTML Report
+## What Runs
 
-After each CI run:
+- `playwright_mcp/mcp_client.py` starts `@playwright/mcp` with `npx` and keeps the stdio session alive.
+- `playwright_mcp/mcp_adapter.py` performs a smoke flow against Playwright's public TodoMVC demo, then evaluates `document.title`.
+- `tests/test_example.py` verifies the Python client is wired to the Playwright MCP stdio command and tool names.
+- `tests/test_mcp_integration.py` is an opt-in live smoke test that launches the real MCP server and browser.
+- `.github/workflows/ci.yml` installs Python dependencies, Node 20, `@playwright/mcp`, Chromium, then runs the full test suite.
 
-1. Report artifact name: pytest-report
+## Local Setup
 
-2. Accessible in the Actions tab → Artifacts section
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+npm install -g @playwright/mcp@latest
+npx -y @playwright/mcp@latest install-browser chrome-for-testing
+```
 
-3. Local report: report.html created in project root
+Run unit tests only:
 
+```powershell
+python -m pytest -v
+```
 
-## 🚀 Future Enhancements
+Run the live MCP smoke locally:
 
-* Matrix build for Ubuntu + Windows
+```powershell
+$env:RUN_PLAYWRIGHT_MCP_INTEGRATION = "1"
+python -m pytest -v tests/test_mcp_integration.py
+```
 
-*  CodeQL security scan workflow
+Run the manual flow:
 
-*  AI-based test case suggestion integration via MCP
+```powershell
+python main.py
+```
 
-*  Playwright parallel execution configuration
+## Configuration
 
-*  Automatic GitHub Pages publishing of HTML report
+The client defaults to the official stdio command:
 
-## 💡Summary
+```text
+npx -y @playwright/mcp@latest --headless --browser chrome --isolated
+```
 
-This framework demonstrates:
+You can override the executable with:
 
-* Seamless Playwright + MCP integration
+```powershell
+$env:PLAYWRIGHT_MCP_COMMAND = "npx"
+```
 
-* Unified test setup for both local and CI environments
+You can override the public smoke-test URL with:
 
-* Intelligent, maintainable, and extensible Python automation architecture
+```powershell
+$env:PLAYWRIGHT_MCP_SMOKE_URL = "https://playwright.dev/"
+$env:PLAYWRIGHT_MCP_SMOKE_TITLE_TEXT = "Playwright"
+```
+
+The previous `MCP_SERVER_URL` WebSocket flow is no longer required for this repo. Browser automation now happens through the local stdio MCP server process.
+
+`@playwright/mcp@latest` currently requires Node.js 20+ for the live smoke. The unit tests still run without launching the MCP server.
+
+The default smoke URL is `https://demo.playwright.dev/todomvc/`, a free public demo app maintained for Playwright automation examples.
+
+## GitHub Actions
+
+The CI workflow:
+
+1. Checks out the repository.
+2. Sets up Python 3.11.
+3. Installs `requirements.txt`.
+4. Sets up Node 20.
+5. Installs `@playwright/mcp@latest`.
+6. Installs Chromium for Playwright.
+7. Runs pytest and uploads `report.html`.

@@ -4,4 +4,3 @@ pytest-html
 pytest-playwright
 PyYAML
 mcp
-openai
