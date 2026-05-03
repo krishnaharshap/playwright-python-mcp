@@ -1,14 +1,21 @@
+
+# mcp_client.py
+
 from mcp.client.stdio import stdio_client, StdioServerParameters
 from mcp.client.session import ClientSession
 import asyncio
+import os
 
 class MCPClient:
-    def __init__(self, server_url: str):
-        self.server_url = server_url
-        self.session = None
+    def __init__(self):
+        self.server_url = os.getenv("MCP_SERVER_URL")
 
     async def connect(self):
+        if not self.server_url:
+            raise ValueError("MCP_SERVER_URL not set")
+
         print(f"[MCP] Connecting to {self.server_url}...")
+        # call HTTP endpoint instead of subprocess
 
         # Define the server parameters
         server_params = StdioServerParameters(
