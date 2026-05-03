@@ -40,13 +40,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          if [ "${{ runner.os }}" == "Windows" ]; then
-            .\venv\Scripts\python.exe -m pip install -r requirements.txt
-            .\venv\Scripts\python.exe -m playwright install
-          else
-            ./venv/bin/python -m pip install -r requirements.txt
-            ./venv/bin/python -m playwright install
-          fi
+          ./venv/bin/python -m pip install -r requirements.txt
+          ./venv/bin/python -m playwright install --with-deps
 
 
       - name: Run tests
