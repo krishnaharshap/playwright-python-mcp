@@ -13,24 +13,24 @@ class MCPClient:
         self.client = httpx.AsyncClient(timeout=30)
 
     async def connect(self):
-        print(f"[MCP] Connecting to {self.server_url}...")
+    print(f"[MCP] Connecting to {self.server_url}...")
 
-        try:
-            response = await self.client.get(self.server_url)
-            if response.status_code != 200:
-                raise RuntimeError(f"Failed to reach MCP server: {response.status_code}")
-        except Exception as e:
-            raise RuntimeError(f"Connection failed: {e}")
+    # Do NOT enforce GET check — just validate URL exists
+    if not self.server_url.startswith("http"):
+        raise ValueError("Invalid MCP_SERVER_URL")
 
-        print("[MCP] Connected.")
+    print("[MCP] Connection config valid.")
 
     async def send_context(self, context_data: dict):
-        response = await self.client.post(
-            self.server_url,
-            json={"context": context_data}
-        )
-        response.raise_for_status()
-        return response.json()
+    response = await self.client.post(
+        self.server_url,
+        json={"context": context_data}
+    )
 
+    if response.status_code >= 400:
+        raise RuntimeError(f"Request failed: {response.status_code}")
+
+    return response.json()
+    
     async def close(self):
         await self.client.aclose()
