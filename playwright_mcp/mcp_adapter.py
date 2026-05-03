@@ -1,11 +1,18 @@
 # playwright_mcp/mcp_adapter.py
 
-import asyncio
-from .mcp_client import MCPClient
+import os
+from playwright_mcp.mcp_client import MCPClient
 
 async def run_mcp_test_flow():
-    client = MCPClient("wss://mcp.openai.com/v1")
+    client = MCPClient()
+
     await client.connect()
-    response = await client.send_context({"page": "https://example.com"})
-    print("MCP Response:", response)
+
+    result = await client.send_context({
+        "test": "playwright execution",
+        "status": "success"
+    })
+
+    print("[MCP RESPONSE]", result)
+
     await client.close()
