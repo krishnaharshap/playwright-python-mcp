@@ -1,41 +1,36 @@
 
 # mcp_client.py
 
-from mcp.client.stdio import stdio_client, StdioServerParameters
-from mcp.client.session import ClientSession
-import asyncio
 import os
+import httpx
 
 class MCPClient:
     def __init__(self):
         self.server_url = os.getenv("MCP_SERVER_URL")
-
-    async def connect(self):
         if not self.server_url:
             raise ValueError("MCP_SERVER_URL not set")
 
+        self.client = httpx.AsyncClient(timeout=30)
+
+    async def connect(self):
         print(f"[MCP] Connecting to {self.server_url}...")
-        # call HTTP endpoint instead of subprocess
 
-        # Define the server parameters
-        server_params = StdioServerParameters(
-            command="your_command_here",  # Replace with the actual command to run your MCP server
-            args=["your", "arguments", "here"],  # Replace with any arguments needed
-        )
-
-        # Use stdio_client to connect to the server
-        async with stdio_client(server_params) as (read_stream, write_stream):
-            self.session = ClientSession(read_stream, write_stream)
-            await self.session.connect()
+        try:
+            response = await self.client.get(self.server_url)
+            if response.status_code != 200:
+                raise RuntimeError(f"Failed to reach MCP server: {response.status_code}")
+        except Exception as e:
+            raise RuntimeError(f"Connection failed: {e}")
 
         print("[MCP] Connected.")
 
     async def send_context(self, context_data: dict):
-        if self.session is None:
-            raise RuntimeError("MCP session not connected.")
-        result = await self.session.query({"context": context_data})
-        return result
+        response = await self.client.post(
+            self.server_url,
+            json={"context": context_data}
+        )
+        response.raise_for_status()
+        return response.json()
 
     async def close(self):
-        if self.session:
-            await self.session.close()
+        await self.client.aclose()
