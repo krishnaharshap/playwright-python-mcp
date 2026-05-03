@@ -3,17 +3,8 @@
 This repository demonstrates a Python test client driving browser automation through the official Playwright MCP server over stdio.
 
 ```text
-GitHub Actions
-   |
-   v
-Python MCP Client
-   |
-   | stdio
-   v
-Playwright MCP server (@playwright/mcp)
-   |
-   v
-Browser automation
+GitHub Actions -> Python MCP Client --stdio--> Playwright MCP server (@playwright/mcp) -> Browser automation
+
 ```
 
 ## What Runs
