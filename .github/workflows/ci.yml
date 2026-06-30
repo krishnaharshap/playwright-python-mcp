@@ -51,7 +51,7 @@ jobs:
       - name: Install Playwright MCP server and browsers
         run: |
           npm install -g @playwright/mcp@latest
-          npx -y @playwright/mcp@latest install-browser --with-deps chrome-for-testing
+          npx @playwright/mcp install-browser chrome-for-testing
 
       - name: Run tests
         run: |

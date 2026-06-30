@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 import asyncio
 import os
@@ -16,7 +17,7 @@ DEFAULT_MCP_ARGS = [
     DEFAULT_MCP_PACKAGE,
     "--headless",
     "--browser",
-    "chrome",
+    "chromium",
     "--isolated",
 ]
 

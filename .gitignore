@@ -3,6 +3,7 @@ __pycache__/
 .vscode/
 .pytest_cache/
 .playwright/
+.playwright-mcp/
 test-results/
 .DS_Store
 Thumbs.db
