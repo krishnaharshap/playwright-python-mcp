@@ -24,13 +24,6 @@ Browser automation
 - `tests/test_mcp_integration.py` is an opt-in live smoke test that launches the real MCP server and browser.
 - `.github/workflows/ci.yml` installs Python dependencies, Node 20, `@playwright/mcp`, Chromium, then runs the full test suite.
 
-## Prerequisites
-
-- Python 3.9+
-- Node.js 20+
-- Git
-- PowerShell (Windows)
-
 ## Project Structure
 
 ```plaintext
@@ -59,6 +52,13 @@ playwright-python-mcp/
 ├── main.py                           # Optional manual runner/demo entry point
 └── report.html                       # Generated HTML test report artifact (CI output, not tracked)
 ```
+
+## Prerequisites
+
+- Python 3.9+
+- Node.js 20+
+- Git
+- PowerShell (Windows)
 
 ## Local Setup
 
