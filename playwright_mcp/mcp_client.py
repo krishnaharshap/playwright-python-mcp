@@ -17,7 +17,7 @@ DEFAULT_MCP_ARGS = [
     DEFAULT_MCP_PACKAGE,
     "--headless",
     "--browser",
-    "chromium",
+    "chrome",
     "--isolated",
 ]
 

@@ -48,7 +48,6 @@ playwright-python-mcp/
 ├── pytest.ini                        # Pytest configuration and default options
 ├── README.md                         # Project overview, setup, and CI usage
 ├── setup_playwright_repo.ps1         # Local Windows setup helper script
-├── commands.txt                      # Useful local development commands
 ├── main.py                           # Optional manual runner/demo entry point
 └── report.html                       # Generated HTML test report artifact (CI output, not tracked)
 ```

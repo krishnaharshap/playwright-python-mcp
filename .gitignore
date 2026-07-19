@@ -7,6 +7,5 @@ __pycache__/
 test-results/
 .DS_Store
 Thumbs.db
-commands.txt
 report.html
 *.pyc
